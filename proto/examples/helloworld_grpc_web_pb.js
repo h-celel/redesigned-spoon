@@ -131,5 +131,61 @@ proto.helloworld.ServicePromiseClient.prototype.hello =
 };
 
 
+/**
+ * @const
+ * @type {!grpc.web.MethodDescriptor<
+ *   !proto.helloworld.Empty,
+ *   !proto.helloworld.HelloResponse>}
+ */
+const methodDescriptor_Service_StreamingHello = new grpc.web.MethodDescriptor(
+  '/helloworld.Service/StreamingHello',
+  grpc.web.MethodType.SERVER_STREAMING,
+  proto.helloworld.Empty,
+  proto.helloworld.HelloResponse,
+  /**
+   * @param {!proto.helloworld.Empty} request
+   * @return {!Uint8Array}
+   */
+  function(request) {
+    return request.serializeBinary();
+  },
+  proto.helloworld.HelloResponse.deserializeBinary
+);
+
+
+/**
+ * @param {!proto.helloworld.Empty} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.helloworld.HelloResponse>}
+ *     The XHR Node Readable Stream
+ */
+proto.helloworld.ServiceClient.prototype.streamingHello =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/helloworld.Service/StreamingHello',
+      request,
+      metadata || {},
+      methodDescriptor_Service_StreamingHello);
+};
+
+
+/**
+ * @param {!proto.helloworld.Empty} request The request proto
+ * @param {?Object<string, string>=} metadata User defined
+ *     call metadata
+ * @return {!grpc.web.ClientReadableStream<!proto.helloworld.HelloResponse>}
+ *     The XHR Node Readable Stream
+ */
+proto.helloworld.ServicePromiseClient.prototype.streamingHello =
+    function(request, metadata) {
+  return this.client_.serverStreaming(this.hostname_ +
+      '/helloworld.Service/StreamingHello',
+      request,
+      metadata || {},
+      methodDescriptor_Service_StreamingHello);
+};
+
+
 module.exports = proto.helloworld;
 

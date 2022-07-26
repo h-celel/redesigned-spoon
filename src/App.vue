@@ -6,8 +6,8 @@
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-import { HelloRequest, Message } from '../../proto/examples/helloworld_pb'
-import { ServicePromiseClient } from '../../proto/examples/helloworld_grpc_web_pb'
+import { Empty , HelloRequest, Message } from '../proto/examples/helloworld_pb'
+import { ServiceClient, ServicePromiseClient } from '../proto/examples/helloworld_grpc_web_pb'
 
 export default {
   name: 'App',
@@ -40,6 +40,21 @@ export default {
   },
   mounted() {
     console.log(`The initial count is ${this.count}.`)
+
+    let client = new ServiceClient('http://localhost:9000', null, null)
+    const e = new Empty()
+    let stream = client.streamingHello(e, {})
+    stream.on('data', function(response) {
+      console.log(response.getMessage().getValue());
+    });
+    stream.on('status', function(status) {
+      console.log(status.code);
+      console.log(status.details);
+      console.log(status.metadata);
+    });
+    stream.on('end', function(end) {
+      console.log(end);
+    });
   }
 }
 </script>
