@@ -9,6 +9,20 @@ import HelloWorld from './components/HelloWorld.vue'
 import { Empty , HelloRequest, Message } from '../proto/examples/helloworld_pb'
 import { ServiceClient, ServicePromiseClient } from '../proto/examples/helloworld_grpc_web_pb'
 
+const fakeToken = 'I am a fake token'
+
+class AuthInterceptor {
+  constructor(token) {
+    this.token = token
+  }
+
+  intercept(request, invoker) {
+    const metadata = request.getMetadata()
+    metadata.Authorization = 'Bearer ' + this.token
+    return invoker(request)
+  }
+}
+
 export default {
   name: 'App',
   components: {
@@ -23,7 +37,12 @@ export default {
     async increment() {
       this.count++
 
-      let client = new ServicePromiseClient('http://localhost:9000', null, null)
+      const authInterceptor = new AuthInterceptor(fakeToken)
+      let options = {
+        unaryInterceptors: [authInterceptor],
+        streamInterceptors: [authInterceptor]
+      }
+      let client = new ServicePromiseClient('http://localhost:9000', null, options)
       const req = new HelloRequest()
       const message = new Message()
       message.setValue('hellooo')
@@ -41,7 +60,12 @@ export default {
   mounted() {
     console.log(`The initial count is ${this.count}.`)
 
-    let client = new ServiceClient('http://localhost:9000', null, null)
+    const authInterceptor = new AuthInterceptor(fakeToken)
+    let options = {
+      unaryInterceptors: [authInterceptor],
+      streamInterceptors: [authInterceptor]
+    }
+    let client = new ServiceClient('http://localhost:9000', null, options)
     const e = new Empty()
     let stream = client.streamingHello(e, {})
     stream.on('data', function(response) {
